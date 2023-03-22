@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', 'TopicsController@index')->name('root');
 
@@ -49,8 +50,3 @@ Route::resource('notifications', 'NotificationsController', ['only' => ['index']
 
 //后台无权访问页面
 Route::get('permission-denied', 'PagesController@permissionDenied')->name('permission-denied');
-
-//L03-API学习
-Route::prefix('v1')->name('api.v1.')->group(function() {
-
-});
