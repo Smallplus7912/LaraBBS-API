@@ -10,7 +10,7 @@ use Overtrue\EasySms\Exceptions\NoGatewayAvailableException;
 
 class VerificationCodesController extends Controller
 {
-    public function store(VerificationCodeRequest $request, EasySms $easySms)
+    public function send(VerificationCodeRequest $request, EasySms $easySms)
     {
         $phone = $request->phone;
 
