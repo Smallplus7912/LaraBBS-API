@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-//验证码验证类
+//验证码表单验证类
 class VerificationCodeRequest extends FormRequest
 {
 

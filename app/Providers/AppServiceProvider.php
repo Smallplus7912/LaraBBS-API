@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Topic;
 use App\Observers\TopicObserver;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\Link::observe(\App\Observers\LinkObserver::class);
         \Illuminate\Pagination\Paginator::useBootstrap();
         Topic::observe(TopicObserver::class);
-        //
+        //删掉返回数据中外层的data
+        JsonResource::withoutWrapping();
     }
 }
