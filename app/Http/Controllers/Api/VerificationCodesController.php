@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Str;
 use Overtrue\EasySms\EasySms;
 use Illuminate\Support\Facades\Cache;
@@ -12,7 +13,16 @@ class VerificationCodesController extends Controller
 {
     public function send(VerificationCodeRequest $request, EasySms $easySms)
     {
-        $phone = $request->phone;
+        $captchaCacheKey = 'captcha_'.$request->captcha_key;
+        $captchaData = Cache::get($captchaCacheKey);
+        if (!$captchaData){
+            abort(403,'图片验证码已失效');
+        }
+        if(!hash_equals(strtolower($captchaData['code']),$request->captcha_code)){
+            Cache::forget($captchaCacheKey);
+            throw new AuthenticationException('验证码错误');
+        }
+        $phone = $captchaData['phone'];
 
         //如果非生产环境，code=1234
         if (!app()->environment('production')) {
@@ -34,18 +44,15 @@ class VerificationCodesController extends Controller
                 abort(500, $message ?: '短信发送异常');
             }
         }
-        //生成个15位随机数key
-        $key = Str::random(15);
-
-        //配置缓存key、缓存过期时间：5分钟
-        $cacheKey = 'verificationCode_' . $key;
+        $smsKey = 'verificationCode_'.Str::random(15);
+        $smsCacheKey = 'verificationCode_'.$smsKey;
         $expiredAt = now()->addMinutes(5);
         //Cache::put（$key, $value, $expiration）键值、过期时间
-        Cache::put($cacheKey, ['phone' => $phone, 'code' => $code], $expiredAt);
-
+        Cache::put($smsCacheKey,['phone'=>$phone,'code'=>$code],$expiredAt);
+        Cache::forget($captchaCacheKey);
         //返回201，15位随机数key和过期时间
         return response()->json([
-            'key' => $key,
+            'key' => $smsKey,
             'expired_at' => $expiredAt->toDateTimeString(),
         ])->setStatusCode(201);
         //return response()->json(['test_message' => 'store verification code']);
