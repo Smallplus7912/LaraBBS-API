@@ -15,12 +15,14 @@ class AuthorizationsController extends Controller
     //第三方登录
     public function socialStore($type, SocialAuthorizationRequest $request)
     {
-        // $type在路由中只定义了wechat
+        // 暂且称$driver为社交登录驱动
         $driver = Socialite::create($type);
 
         try {
-            //客户端要么提交授权码code，要么通过wechat方式，提供openid和access token
+            //如果请求中提交了code,要么通过wechat方式，提供openid和access token
             if ($code = $request->code) {
+                //$oauthUser被赋值为对应用户的详细信息
+                //userFromCode($code)通过用户提交的code，去数据库中获取获取code对应的用户信息
                 $oauthUser = $driver->userFromCode($code);
             } else {
                 if ($type == 'wechat') {
