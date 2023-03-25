@@ -36,4 +36,12 @@ return [
         'key'   => env('OH4GmiJRzGkMLUeMT5Zv'),
     ],
 
+    'socialite' => [
+        'wechat' => [
+            'client_id' => env('WEIXIN_APP_ID'),
+            'client_secret' => env('WEIXIN_APP_SECRET'),
+            'redirect' => env('WEIXIN_REDIRECT_URI'),
+        ]
+    ]
+
 ];
