@@ -10,12 +10,23 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Str;
-
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, JWTSubject
 {
-    use HasApiTokens, HasFactory, MustVerifyEmailTrait;
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+    public function getJWTCustomClaims(): array
+    {
+        return [];
+    }
+
+    use HasApiTokens;
+    use HasFactory;
+    use MustVerifyEmailTrait;
 
     use Notifiable {
         notify as protected laravelNotify;
@@ -87,7 +98,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     //判断是否为作者
     //引用位置：topicpolilcy
-    public function isAuthorOf($model)
+    public function isAuthorOf($model): bool
     {
         return $this->id == $model->user_id;
     }
@@ -109,7 +120,6 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // 如果值的长度等于 60，即认为是已经做过加密的情况
         if (strlen($value) != 60) {
-
             // 不等于 60，做密码加密处理
             $value = bcrypt($value);
         }
@@ -120,8 +130,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function setAvatarAttribute($path)
     {
         // 如果不是 `http` 子串开头，那就是从后台上传的，需要补全 URL
-        if ( ! Str::startsWith($path, 'http')) {
-
+        if (! Str::startsWith($path, 'http')) {
             // 拼接完整的 URL
             $path = config('app.url') . "/uploads/images/avatars/$path";
         }
